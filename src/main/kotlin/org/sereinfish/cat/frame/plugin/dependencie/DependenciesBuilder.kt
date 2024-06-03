@@ -2,31 +2,22 @@ package org.sereinfish.cat.frame.plugin.dependencie
 
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.apache.maven.model.Dependency
-import org.apache.maven.model.Model
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.sereinfish.cat.frame.CatFrameConfig
 import org.sereinfish.cat.frame.config.Config
 import org.sereinfish.cat.frame.config.getClassOrElse
 import org.sereinfish.cat.frame.context.getOrNull
 import org.sereinfish.cat.frame.plugin.dependencie.entity.DependenciesInfo
-import org.sereinfish.cat.frame.utils.isNull
 import org.sereinfish.cat.frame.utils.logger
 import org.sereinfish.cat.frame.utils.nonNull
-import org.slf4j.Logger
 import java.io.File
 import java.io.FileOutputStream
-import java.io.FileReader
 import java.net.InetSocketAddress
 import java.net.Proxy
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.util.concurrent.ConcurrentHashMap
-import kotlin.math.log
 
 /**
  * 传入配置文件，构建依赖信息
  */
+@Deprecated("已放弃使用")
 class DependenciesBuilder(
     config: Config
 ) {
@@ -79,6 +70,8 @@ class DependenciesBuilder(
             }
         }
     } ?: listOf()
+
+
 
     /**
      * 初始化依赖文件列表
@@ -149,21 +142,26 @@ class DependenciesBuilder(
         logger.debug("依赖下载完成：{}", dependenciesInfo)
 
         // 递归解析父依赖
-        val model = MavenXpp3Reader().read(FileReader(pomFile))
-
-        val repositories: List<String> = model.repositories.map { it.url }.let {
-            if (it.contains("https://repo.maven.apache.org/maven2/").not())
-                it.toMutableList().apply {
-                    add("https://repo.maven.apache.org/maven2/")
-                }
-            else it
-        }
-
-        model.dependencies.map { dependency ->
-            dependency.toInfo(model, repositories, logger)
-        }.forEach {
-            it?.let { download(it) }
-        }
+//        val model = try {
+//            MavenXpp3Reader().read(BufferedReader(FileReader(pomFile)))
+//        }catch (e: Exception){
+//            logger.error("读取文件 ${pomFile} 失败", e)
+//            throw e
+//        }
+//
+//        val repositories: List<String> = model.repositories.map { it.url }.let {
+//            if (it.contains("https://repo.maven.apache.org/maven2/").not())
+//                it.toMutableList().apply {
+//                    add("https://repo.maven.apache.org/maven2/")
+//                }
+//            else it
+//        }
+//
+//        model.dependencies.map { dependency ->
+//            dependency.toInfo(model, repositories, logger)
+//        }.forEach {
+//            it?.let { download(it) }
+//        }
     }
 
     private fun downloadPom(dependenciesInfo: DependenciesInfo): File {
@@ -199,49 +197,4 @@ class DependenciesBuilder(
         }
         error("所有POM文件解析均失败：${dependenciesInfo}")
     }
-}
-
-fun Dependency.toInfo(model: Model, repositories: List<String>, logger: Logger = logger()): DependenciesInfo? {
-    val dependency = this
-
-    var version = dependency.version
-    var groupId = dependency.groupId
-
-    if (groupId == "\${project.groupId}"){
-        groupId = model.groupId
-    }
-
-    if (dependency.version.isNull()) {
-        model.dependencyManagement?.dependencies?.forEach {
-            println("${it.groupId}:${it.artifactId}:${it.version}")
-            if (it.groupId == dependency.groupId && it.artifactId == dependency.artifactId)
-                version = it.version
-        }
-    }
-
-    if (version == "\${project.version}"){
-        version = model.version
-    }
-
-    return if (version.nonNull()){
-        runCatching {
-            DependenciesInfo(
-                dependency.groupId,
-                dependency.artifactId,
-                version,
-                dependency.classifier,
-                repositories
-            ).also {
-                logger.debug("解析传递依赖：{}", it)
-            }
-        }.getOrElse {
-            logger.error("""
-                    ${dependency.groupId}
-                    ${dependency.artifactId}
-                    ${dependency.version}
-                    ${dependency.classifier}
-                """.trimIndent())
-            throw it
-        }
-    }else null
 }

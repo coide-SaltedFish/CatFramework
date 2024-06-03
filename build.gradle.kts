@@ -15,7 +15,16 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("org.yaml:snakeyaml:2.2")
-    implementation("org.apache.maven:maven-model:3.9.6")
+//    implementation("org.apache.maven:maven-model:3.9.6")
+
+    implementation("org.apache.maven.resolver:maven-resolver-api:1.9.20")
+    implementation("org.apache.maven.resolver:maven-resolver-impl:1.9.20")
+    implementation("org.apache.maven.resolver:maven-resolver-transport-file:1.9.20")
+    implementation("org.apache.maven.resolver:maven-resolver-transport-http:1.9.20")
+    implementation("org.apache.maven.resolver:maven-resolver-connector-basic:1.9.20")
+    implementation("org.apache.maven:maven-resolver-provider:3.9.7")
+    implementation("org.apache.maven.resolver:maven-resolver-supplier:1.9.20")
+
 
     // 日志依赖
     implementation("org.slf4j:slf4j-api:2.0.12")

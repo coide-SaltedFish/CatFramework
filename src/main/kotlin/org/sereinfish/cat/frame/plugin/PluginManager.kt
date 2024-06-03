@@ -4,7 +4,7 @@ import org.sereinfish.cat.frame.CatFrameConfig
 import org.sereinfish.cat.frame.PluginInfo
 import org.sereinfish.cat.frame.config.SimplePluginConfig
 import org.sereinfish.cat.frame.context.getOrElse
-import org.sereinfish.cat.frame.plugin.dependencie.DependenciesBuilder
+import org.sereinfish.cat.frame.plugin.dependencie.DependenciesUtils
 import org.sereinfish.cat.frame.plugin.loader.PluginClassloader
 import org.sereinfish.cat.frame.utils.isNull
 import org.sereinfish.cat.frame.utils.logger
@@ -63,7 +63,7 @@ object PluginManager {
             if (_pluginsReal.contains(pluginId)){
                 logger.warn("插件已加载，将会覆盖已加载插件：$pluginId")
             }else {
-                logger.info("加载插件：$pluginId")
+                logger.info("加载插件：[$pluginId] file=$it")
             }
 
             logger.debug("加载插件[{}]：{}", pluginId, it)
@@ -73,11 +73,12 @@ object PluginManager {
             val config = SimplePluginConfig(it)
             // 获取依赖信息
             logger.debug("获取插件依赖: {}", it)
-            val dependenciesBuilder = DependenciesBuilder(config)
-
+//            val dependenciesBuilder = DependenciesBuilder(config)
+            val dependenciesFiles = DependenciesUtils.loadDependencies(config)
             // 初始化类加载器
             logger.debug("初始化插件类加载器: {}", it)
-            val pluginClassloader = PluginClassloader(pluginId, it, dependenciesBuilder.initImplementations())
+//            val pluginClassloader = PluginClassloader(pluginId, it, dependenciesBuilder.initImplementations())
+            val pluginClassloader = PluginClassloader(pluginId, it, dependenciesFiles)
 
             val pluginInfo = PluginInfo(
                 pluginId,
@@ -91,9 +92,19 @@ object PluginManager {
             _pluginsReal[pluginId] = pluginInfo
         }
         // 所有插件类加载器初始化完成后，对插件依赖进行分配
+//        _pluginsReal.values.forEach { pluginInfo ->
+//            val dependenciesBuilder = DependenciesBuilder(pluginInfo.config)
+//            dependenciesBuilder.plugins.forEach {
+//                _pluginsReal[it.id]?.classLoader?.let {
+//                    pluginInfo.classLoader.addParentPlugin(it)
+//                } ?: run {
+//                    if (it.optional.not())
+//                        error("无法找到插件[${pluginInfo.id}]所依赖的插件[${it.id}]")
+//                }
+//            }
+//        }
         _pluginsReal.values.forEach { pluginInfo ->
-            val dependenciesBuilder = DependenciesBuilder(pluginInfo.config)
-            dependenciesBuilder.plugins.forEach {
+            DependenciesUtils.getPluginDependencies(pluginInfo.config).forEach {
                 _pluginsReal[it.id]?.classLoader?.let {
                     pluginInfo.classLoader.addParentPlugin(it)
                 } ?: run {

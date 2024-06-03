@@ -2,10 +2,8 @@ package org.sereinfish.cat.frame.plugin.dependencie.entity
 
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.sereinfish.cat.frame.CatFrameConfig
-import org.sereinfish.cat.frame.plugin.dependencie.toInfo
 import org.sereinfish.cat.frame.utils.logger
 import java.io.*
-import java.nio.file.Files
 
 
 /**
@@ -74,7 +72,6 @@ data class DependenciesInfo(
         "$it.pom"
     }
 
-
     /**
      * 获取依赖所有相关jar文件
      */
@@ -100,17 +97,17 @@ data class DependenciesInfo(
         val model = MavenXpp3Reader().read(InputStreamReader(FileInputStream(pomFile), getPomCharsetName(pomFile)))
         val path = File(CatFrameConfig.libsPath, "${dependenciesInfo.path}${dependenciesInfo.name}.jar").absolutePath
 
-        if (list.contains(path)){
-            return
-        }else {
-            list.add(path)
-
-            model.dependencies.map {
-                it.toInfo(model, repositories, logger)
-            }.forEach {
-                it?.let { it.files(list, it) }
-            }
-        }
+//        if (list.contains(path)){
+//            return
+//        }else {
+//            list.add(path)
+//
+//            model.dependencies.map {
+//                it.toInfo(model, repositories, logger)
+//            }.forEach {
+//                it?.let { it.files(list, it) }
+//            }
+//        }
     }
 
     private fun getPomCharsetName(file: File): String {
