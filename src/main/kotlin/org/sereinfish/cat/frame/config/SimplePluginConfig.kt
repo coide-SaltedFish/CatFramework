@@ -9,6 +9,8 @@ import java.io.FileNotFoundException
 import java.io.InputStreamReader
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
+import java.nio.file.StandardOpenOption
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.jar.JarFile
@@ -24,6 +26,7 @@ class SimplePluginConfig(
     var pluginId: String = jarFile.manifest.mainAttributes.getValue("CatPluginId") ?: error("无法获取插件ID，属性值为 NULL: $file")
 
     override val configPath: String = "${CatFrameConfig.pluginConfigPath}/$pluginId"
+    override val configFile: String = "$configPath/config.yml"
     override val data: ConcurrentHashMap<String, Any?> = ConcurrentHashMap()
 
     /**
@@ -77,4 +80,9 @@ class SimplePluginConfig(
         }
     }
 
+    override fun set(path: String, value: Any?): Any? {
+        return super.set(path, value).also {
+            save()
+        }
+    }
 }

@@ -1,16 +1,12 @@
 package org.sereinfish.cat.frame.config
 
-import com.google.gson.reflect.TypeToken
 import org.sereinfish.cat.frame.context.Context
 import org.sereinfish.cat.frame.utils.toClass
 import org.sereinfish.cat.frame.utils.toJson
-import org.sereinfish.cat.frame.utils.toYaml
-import org.yaml.snakeyaml.Yaml
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * 配置文件
@@ -18,15 +14,17 @@ import java.util.concurrent.ConcurrentHashMap
 interface Config: Context {
     // 配置文件路径
     val configPath: String
+    val saveBlackListKeys: List<String> get() = listOf("plugin", "dependencies")
+    val configFile: String get() = configPath
 
     val configType: ConfigType get() = when {
-        configPath.endsWith(".json", true) -> ConfigType.JSON
-        configPath.endsWith(".yml", true) || configPath.endsWith(".yaml", true) -> ConfigType.YAML
-        else -> error("Unknown configuration file format, suffix: ${configPath.substringAfterLast(".")}")
+        configFile.endsWith(".json", true) -> ConfigType.JSON
+        configFile.endsWith(".yml", true) || configFile.endsWith(".yaml", true) -> ConfigType.YAML
+        else -> error("Unknown configuration file format, suffix: ${configFile.substringAfterLast(".")}")
     }
 
-    override operator fun get(path: String): Any? {
-        val paths = path.split(".")
+    override operator fun get(key: String): Any? {
+        val paths = key.split(".")
         var d: Any? = data
         for (p in paths){
             (d as? Map<String, Any?>)?.let {
@@ -37,8 +35,8 @@ interface Config: Context {
     }
 
 
-    override operator fun set(path: String, value: Any?): Any? {
-        val paths = path.split(".")
+    override operator fun set(key: String, value: Any?): Any? {
+        val paths = key.split(".")
         var d: MutableMap<String, Any?> = data
 
         for (p in paths.subList(0, paths.size - 1)){
@@ -66,18 +64,28 @@ interface Config: Context {
      * 保存配置
      */
     private fun save(data: Map<String, Any?>) {
+        val saveData = HashMap<String, Any?>().apply {
+            // TODO 黑名单支持 key path
+            data.forEach { (key, value) ->
+                if (saveBlackListKeys.contains(key).not()){
+                    put(key, value)
+                }
+            }
+        }
+
         val filePath = Paths.get(configPath)
+        val file = Paths.get(configFile)
         // 检查路径是否正确
-        if (Files.notExists(filePath.parent)){
-            Files.createDirectories(filePath.parent)
+        if (Files.notExists(filePath)){
+            Files.createDirectories(filePath)
         }
         // 备份原有配置
-        if (Files.exists(filePath)){
-            val backupPath = Paths.get("$configPath.backup")
-            Files.copy(filePath, backupPath, StandardCopyOption.REPLACE_EXISTING)
+        if (Files.exists(file)){
+            val backupPath = Paths.get("$configFile.backup")
+            Files.copy(file, backupPath, StandardCopyOption.REPLACE_EXISTING)
         }
         // 写入新配置
-        Files.write(filePath, encoded(data).toByteArray(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+        Files.write(file, encoded(saveData).toByteArray(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
     }
 
     /**
@@ -99,7 +107,7 @@ interface Config: Context {
     private fun decode(): Map<String, Any?> {
         var data = ""
 
-        val filePath = Paths.get(configPath)
+        val filePath = Paths.get(configFile)
         if (Files.exists(filePath)){
             data = Files.readString(filePath)
         }else {

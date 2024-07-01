@@ -14,7 +14,7 @@ open class EventHandlerContext<out E: Event>(
     val event: E by value()
 
     // 是否终止事件处理
-    var stopHandler: Boolean by valueOrElse { false }
+    var stopHandler: Boolean by valueOrElse { true }
 
     init {
         set("event", event)

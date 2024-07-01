@@ -103,8 +103,9 @@ object EventManager {
             handler.invoke(context)
 
             // 终止事件处理
-            if (context.stopHandler)
+            if (context.stopHandler) {
                 break
+            }
         }
     }
 
@@ -112,6 +113,6 @@ object EventManager {
      * 关闭事件处理器运行
      */
     fun close(){
-        _isCloseFlag = true
+        _isCloseFlag = false
     }
 }
