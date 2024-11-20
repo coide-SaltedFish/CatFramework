@@ -1,16 +1,12 @@
 package org.sereinfish.cat.frame.event.invoker
 
-import java.util.concurrent.PriorityBlockingQueue
+import java.util.*
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * 处理链
  */
-open class InvokerChain<I: Invoker<I, C>, C: InvokerContext>: PriorityBlockingQueue<I>(
-    11,
-    Comparator<I> { e1, e2 ->
-        e1.level - e2.level  // 数越大越后面
-    }
-) {
+open class InvokerChain<I: Invoker<I, C>, C: InvokerContext>: CopyOnWriteArrayList<I>() {
     /**
      * 执行执行链
      */
@@ -19,10 +15,14 @@ open class InvokerChain<I: Invoker<I, C>, C: InvokerContext>: PriorityBlockingQu
     }
 
     override fun add(element: I): Boolean {
-        return super.add(element)
+        return super.add(element).also {
+            sortBy { it.level }
+        }
     }
 
     override fun addAll(elements: Collection<I>): Boolean {
-        return super.addAll(elements)
+        return super.addAll(elements).also {
+            sortBy { it.level }
+        }
     }
 }

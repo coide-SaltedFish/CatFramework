@@ -1,10 +1,13 @@
 package org.sereinfish.cat.frame.utils
 
 import com.google.gson.GsonBuilder
+import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.*
+import org.sereinfish.cat.frame.plugin.Plugin
 import org.slf4j.LoggerFactory
 import org.yaml.snakeyaml.DumperOptions
 import org.yaml.snakeyaml.Yaml
+import java.lang.reflect.Method
 import java.lang.reflect.Type
 import kotlin.coroutines.CoroutineContext
 import kotlin.experimental.ExperimentalTypeInference
@@ -75,6 +78,23 @@ inline fun <reified T> String.yamlToClass(
     type: Class<T> = T::class.java
 ): T? {
     return Yaml(DumperOptions().apply(dumperOptionsBuilder)).loadAs(this, type)
+}
+
+/**
+ * 确保插件被导入才执行代码
+ */
+@OptIn(ExperimentalTypeInference::class)
+inline fun <reified T, R> ensurePluginImport(
+    plugin: Plugin,
+    errorBlock: () -> Result<R> = { Result.failure(Exception("指定插件的类未导入：${T::class.java.name}")) },
+    @BuilderInference block: () -> Result<R>
+): Result<R> {
+    return try {
+        plugin.classloader.loadClass(T::class.java.name) ?: throw ClassNotFoundException(T::class.java.name)
+        block()
+    } catch (e: Exception) {
+        errorBlock()
+    }
 }
 
 /**

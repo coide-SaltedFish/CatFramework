@@ -1,5 +1,7 @@
 package org.sereinfish.cat.frame.event.handler
 
+import org.sereinfish.cat.frame.context.Context
+import org.sereinfish.cat.frame.context.SimpleContext
 import org.sereinfish.cat.frame.event.Event
 import org.sereinfish.cat.frame.event.EventHandlerChain
 import org.sereinfish.cat.frame.event.EventHandlerContext
@@ -13,5 +15,6 @@ abstract class AbstractEventHandler<E: Event, C: EventHandlerContext<E>>(
     preProcess: EventHandlerChain<E, C> = EventHandlerChain(),
     postProcess:EventHandlerChain<E, C> = EventHandlerChain(),
     exceptionHandle:EventHandlerChain<E, C> = EventHandlerChain(),
-): EventHandler<E, C>,
-    AbstractInvoker<EventHandler<E, C>, C>(level, preProcess, postProcess, exceptionHandle)
+): EventHandler<E, C>, AbstractInvoker<EventHandler<E, C>, C>(level, preProcess, postProcess, exceptionHandle) {
+    override val context: Context = SimpleContext()
+}

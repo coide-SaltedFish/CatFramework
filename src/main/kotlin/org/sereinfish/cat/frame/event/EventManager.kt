@@ -1,6 +1,8 @@
 package org.sereinfish.cat.frame.event
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.sereinfish.cat.frame.CatFrameConfig
 import org.sereinfish.cat.frame.context.getOrElse
 import org.sereinfish.cat.frame.event.handler.EventHandler
@@ -10,6 +12,7 @@ import org.sereinfish.cat.frame.event.invoker.InvokerChain
 import org.sereinfish.cat.frame.utils.creatContextScope
 import org.sereinfish.cat.frame.utils.logger
 import java.util.Vector
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.PriorityBlockingQueue
 
@@ -80,6 +83,12 @@ object EventManager {
     fun <E: Event, C: EventHandlerContext<E>> registerHandler(handler: EventHandler<E, C>){
         eventHandlerList.add(handler as EventHandler<Event, EventHandlerContext<Event>>)
     }
+
+    /**
+     * 移除事件处理器
+     */
+    fun unregisterHandler(handler: EventHandler<*, *>) =
+        eventHandlerList.remove(handler)
 
     /**
      * 广播事件

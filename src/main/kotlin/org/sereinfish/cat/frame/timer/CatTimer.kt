@@ -3,6 +3,7 @@ package org.sereinfish.cat.frame.timer
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.sereinfish.cat.frame.utils.creatContextScope
+import org.sereinfish.cat.frame.utils.logger
 import java.util.Vector
 
 /**
@@ -15,12 +16,21 @@ import java.util.Vector
  * 支持在等待指定时间后开始执行
  */
 object CatTimer {
+    private val logger = logger()
     private val scope = creatContextScope()
     private val tasks = Vector<CatTimerTask>()
 
     fun excute(task: CatTimerTask){
         tasks.add(task)
+        logger.info("加入新任务 ${task.id}")
         runTask(task)
+    }
+
+    /**
+     * 获取当前任务数
+     */
+    fun size(): Int {
+        return tasks.size
     }
 
     private fun runTask(task: CatTimerTask){

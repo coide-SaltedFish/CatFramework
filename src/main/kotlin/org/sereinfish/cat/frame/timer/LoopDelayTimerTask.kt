@@ -1,40 +1,44 @@
 package org.sereinfish.cat.frame.timer
 
 import org.sereinfish.cat.frame.utils.logger
-import java.text.SimpleDateFormat
-import java.util.*
+import java.util.UUID
 
-class SimpleCatTimerTask(
+class LoopDelayTimerTask(
     override val id: String = UUID.randomUUID().toString(),
-    val startDelayFunc: suspend () -> Long = { 0L },
-    val timerData: TimerData,
+    val startDelay: Long,
+    val delay: Long,
+    val loopCount: Int = 0, // 小于1表示无限循环
     val catchFunc: suspend (e: Exception) -> Unit = { e -> logger().error("定时任务异常", e) },
-    val loopFunc: suspend () -> Boolean = { true },
-    val startFunc: suspend () -> Unit = {},
-    val runFunc: suspend () -> Unit
+    val startFunc: () -> Unit = {},
+    val runFunc: () -> Unit
 ): CatTimerTask {
-    override suspend fun start() {
-        startFunc()
-    }
 
-    override suspend fun startDelay(): Long {
-        return startDelayFunc()
-    }
-
-
-    override suspend fun run() {
-        runFunc()
-    }
+        private var execCount = 0
 
     override suspend fun catch(e: Exception) {
         catchFunc(e)
     }
 
+    override suspend fun start() {
+        startFunc()
+    }
+
+    override suspend fun startDelay(): Long {
+        return startDelay
+    }
+
+    override suspend fun run() {
+        runFunc()
+        execCount ++
+    }
+
     override suspend fun delay(): Long {
-        return timerData.delayNext()
+        return delay
     }
 
     override suspend fun loop(): Boolean {
-        return loopFunc()
+        return if (loopCount < 1) true else {
+            execCount < loopCount
+        }
     }
 }

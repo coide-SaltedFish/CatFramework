@@ -69,7 +69,11 @@ object DependenciesUtils {
         }
         // 依赖地址列表
         val implementations: List<String> = config.getClassOrElse("dependencies.implementations") { listOf() }
-        val centrals = repositories.map { RemoteRepository.Builder("central", "default", it).build() }
+        val centrals = repositories.map {
+            RemoteRepository.Builder("central", "default", it)
+                .setProxy(proxy)
+                .build()
+        }
 
         val files = ArrayList<File>()
         // 尝试解析下载

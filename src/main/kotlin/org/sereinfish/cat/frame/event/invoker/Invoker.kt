@@ -1,7 +1,7 @@
 package org.sereinfish.cat.frame.event.invoker
 
 interface Invoker<I: Invoker<I, C>, C: InvokerContext> {
-    val level: Int // 执行器优先级，决定执行顺序
+    val level: Int // 执行器优先级，决定执行顺序, 数越大越后面
 
     val preProcess: InvokerChain<I, C>
     val postProcess: InvokerChain<I, C>

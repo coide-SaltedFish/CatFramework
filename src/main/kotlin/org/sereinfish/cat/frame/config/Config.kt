@@ -3,6 +3,7 @@ package org.sereinfish.cat.frame.config
 import org.sereinfish.cat.frame.context.Context
 import org.sereinfish.cat.frame.utils.toClass
 import org.sereinfish.cat.frame.utils.toJson
+import java.lang.reflect.Type
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
@@ -77,7 +78,7 @@ interface Config: Context {
         val file = Paths.get(configFile)
         // 检查路径是否正确
         if (Files.notExists(filePath)){
-            Files.createDirectories(filePath)
+            Files.createDirectories(filePath.parent)
         }
         // 备份原有配置
         if (Files.exists(file)){
@@ -118,14 +119,14 @@ interface Config: Context {
     }
 }
 
-inline fun <reified T> Config.getClassOrNull(name: String): T? {
-    return get(name)?.toJson()?.toClass()
+inline fun <reified T> Config.getClassOrNull(name: String, type: Type = T::class.java): T? {
+    return get(name)?.toJson()?.toClass(type)
 }
 
-inline fun <reified T> Config.getClassOrElse(name: String, default: (String) -> T): T =
-    getClassOrNull(name) ?: default(name)
+inline fun <reified T> Config.getClassOrElse(name: String, type: Type = T::class.java, default: (String) -> T): T =
+    getClassOrNull(name, type) ?: default(name)
 
-inline fun <reified T> Config.getClassOrPut(name: String, default: (String) -> T): T =
-    getClassOrNull(name) ?: default(name).also {
+inline fun <reified T> Config.getClassOrPut(name: String, type: Type = T::class.java, default: (String) -> T): T =
+    getClassOrNull(name, type) ?: default(name).also {
         set(name, it)
     }

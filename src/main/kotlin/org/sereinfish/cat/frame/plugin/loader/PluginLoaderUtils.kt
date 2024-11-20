@@ -2,7 +2,10 @@ package org.sereinfish.cat.frame.plugin.loader
 
 object PluginLoaderUtils {
     val blackList: List<(String) -> Boolean> = listOf(
-        { it.startsWith("kotlin.") },
+        {
+            it.startsWith("kotlin.")
+                    && it.startsWith("kotlin.script.").not()
+        },
         { it.startsWith("java.") },
         { it == "org.sereinfish.cat.frame.plugin.Plugin" },
         { it.startsWith("org.slf4j.") }

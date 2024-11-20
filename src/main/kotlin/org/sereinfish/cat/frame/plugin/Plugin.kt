@@ -9,9 +9,14 @@ import org.slf4j.LoggerFactory
  * 插件类
  */
 interface Plugin {
+
     val id: String get() =
         (this::class.java.classLoader as? PluginClassloader)?.pluginId
-            ?: error("插件主类初始化失败，错误的类加载器 ${this::class.java.classLoader::class.java}")
+            ?: error("插件主类初始化失败，无法加载插件id，错误的类加载器 ${this::class.java.classLoader::class.java}")
+
+    val classloader: PluginClassloader get() =
+        (this::class.java.classLoader as? PluginClassloader)
+            ?: error("错误的插件主类加载器：${this::class.java.classLoader::class.java}")
 
     val config: Config get() = PluginManager.plugins[id]?.config ?: error("插件尚未被加载：${id}")
 

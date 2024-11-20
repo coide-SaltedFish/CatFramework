@@ -1,8 +1,6 @@
 package org.sereinfish.cat.frame.context.property
 
 import org.sereinfish.cat.frame.context.Context
-import org.sereinfish.cat.frame.context.TypeParser
-import org.sereinfish.cat.frame.context._getOrNull
 import org.sereinfish.cat.frame.context.getOrNull
 import kotlin.reflect.KProperty
 import kotlin.reflect.jvm.jvmErasure
@@ -12,7 +10,7 @@ class ContextOrElseProperty<T>(
     val default: (String) -> T
 ) {
     operator fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        return context._getOrNull<T>(
+        return context.getOrNull<T>(
             property.returnType.jvmErasure.java,
             property.name
         ) ?: default(property.name)

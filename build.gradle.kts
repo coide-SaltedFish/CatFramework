@@ -1,6 +1,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    id("com.github.johnrengelman.shadow") version "6.1.0"
+
     kotlin("jvm") version "1.9.21"
 }
 
@@ -31,12 +33,22 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.5.3")
 
     testImplementation(kotlin("test"))
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.21")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
     implementation(kotlin("reflect"))
 }
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.shadowJar {
+    archiveBaseName.set("CatFramework")
+    archiveVersion.set("0.0.205")
+
+    manifest {
+        attributes["Main-Class"] = "org.sereinfish.cat.MainKt"
+    }
 }
 
 tasks.withType<KotlinCompile> {

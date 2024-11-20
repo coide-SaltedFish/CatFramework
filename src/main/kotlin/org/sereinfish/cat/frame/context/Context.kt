@@ -1,6 +1,5 @@
 package org.sereinfish.cat.frame.context
 
-import org.sereinfish.cat.frame.config.Config
 import org.sereinfish.cat.frame.context.property.*
 import java.util.Vector
 import java.util.concurrent.ConcurrentHashMap
@@ -21,6 +20,10 @@ interface Context {
     fun <T> contextOrPutProperty(default: (String) -> T) = ContextOrPutProperty(this, default)
 }
 
+inline fun <reified T> Context.getOrNull(name: String): T? {
+    return getOrNull(T::class.java, name)
+}
+
 inline fun <reified T> Context.getOrElse(name: String, default: (String) -> T): T {
     return getOrNull(name) ?: default(name)
 }
@@ -34,11 +37,7 @@ inline fun <reified T> Context.getOrPut(name: String, default: (String) -> T): T
 /**
  * 获取指定类型或者返回Null
  */
-inline fun <reified T> Context.getOrNull(name: String): T? {
-    return get(name) as? T
-}
-
-internal fun <T> Context._getOrNull(
+fun <T> Context.getOrNull(
     type: Class<*>,
     name: String
 ): T? {

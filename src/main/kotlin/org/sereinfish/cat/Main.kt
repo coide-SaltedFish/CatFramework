@@ -6,6 +6,7 @@ import org.sereinfish.cat.frame.event.events.CatFrameCloseEvent
 import org.sereinfish.cat.frame.event.events.CatFrameStartEvent
 import org.sereinfish.cat.frame.log.CatLogger
 import org.sereinfish.cat.frame.plugin.PluginManager
+import org.sereinfish.cat.frame.utils.Banner
 import org.sereinfish.cat.frame.utils.creatContextScope
 import org.sereinfish.cat.frame.utils.logger
 import java.util.*
@@ -20,8 +21,10 @@ private val logger = logger()
  * org.sereinfish.cat.frame
  */
 fun main() {
-    logger.info("框架启动")
+    Banner.print()
+
     CatLogger.init()
+    logger.info("框架启动")
 
     logger.info("初始化插件")
     PluginManager.init()

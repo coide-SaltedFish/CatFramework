@@ -142,5 +142,7 @@ object PluginManager {
         _levelPlugins.forEach {
             it.close()
         }
+
+        ""
     }
 }

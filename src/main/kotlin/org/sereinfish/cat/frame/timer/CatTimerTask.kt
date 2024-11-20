@@ -8,6 +8,7 @@ import org.sereinfish.cat.frame.utils.logger
  * 由任务执行部分，延迟计算部分，循环判断部分组成
  */
 interface CatTimerTask {
+    val id: String
 
     suspend fun start()
 

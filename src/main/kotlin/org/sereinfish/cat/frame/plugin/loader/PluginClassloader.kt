@@ -26,13 +26,30 @@ class PluginClassloader(
                 ?: run {
                     if (PluginLoaderUtils.isBlackList(name)) {
                         dependencyClassloader.loadClass(name)
-                    }else null
+                    } else if (name.startsWith("kotlin.")) {
+                        runCatching { ClassLoader.getSystemClassLoader().loadClass(name) }.getOrNull()
+                    } else null
                 }
                 ?: runCatching {
                     findClass(name)
                 }.getOrNull()
                 ?: dependencyClassloader.loadClass(name)
                 ?: throw ClassNotFoundException(name)
+        }
+    }
+
+    /**
+     * 仅加载插件类
+     */
+    fun loadPluginClass(name: String): Class<*>? {
+        return synchronized(getClassLoadingLock(name)) {
+            findLoadedClass(name) ?: run {
+                if (PluginLoaderUtils.isBlackList(name)) {
+                    null
+                } else runCatching {
+                    findClass(name)
+                }.getOrNull()
+            }
         }
     }
 
